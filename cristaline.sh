@@ -5,8 +5,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-#masterlist_url="https://raw.githubusercontent.com/Papawy/cristaline/master/masterlist"
-masterlist_url="https://pastebin.com/raw/YyyRFyNw"
+masterlist_url="https://raw.githubusercontent.com/Papawy/cristaline/master/masterlist"
 
 mode_verbose=0
 mode_noexec=0
@@ -69,8 +68,8 @@ user=""
 conf_name=""
 found=0
 
-curl --silent "$masterlist_url" > "/dev/null"
-if [ $? -ne 0 ]; then
+curl_res=$(curl --silent "$masterlist_url")
+if [ $? -ne 0 ] || [ "$curl_res" == "404: Not Found" ]; then
     verbose "Masterlist not found, exiting"
     exit 1
 fi
