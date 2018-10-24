@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -lt 1 ]; then
     echo "Usage: ./cristaline.sh [OPTIONS...] CONFLOOSE"
@@ -42,10 +42,10 @@ verbose()
 }
 
 # exec_confloose user, repo, confloose_name
-exec_conflooe()
+exec_confloose()
 {
     verbose "Getting the conflose $3 from $1 in $2..."
-    wget --quiet "https://github.com/$1/$2/blob/master/$3.sh -O confloose.sh"
+    wget --quiet "https://raw.githubusercontent.com/$1/$2/master/$3.sh" -O "confloose.sh"
 
     verbose "Executing confloose script in background."
     if [ "$mode_noexec" -eq 1 ]; then
@@ -54,7 +54,7 @@ exec_conflooe()
         bash "confloose.sh" &
     fi
 
-    if [ "$mode_noexec" -eq 0]; then
+    if [ "$mode_noexec" -eq 0 ]; then
         verbose "Removing confloose script file."
         rm -f "confloose.sh"
     fi
@@ -94,27 +94,20 @@ fi
 verbose "User selected $1, seeing if it exist"
 
 #format : user,repo,conf
-while IFS=''; read -r line; do
-    read -r repo user conf_name <<<$(echo "$line" | sed -r "s/([^,]*),([^,]*),([^,]*)/\1 \2 \3/")
-    if [ "$1" == conf_name ]; then
-        found=1
-        break
+while read line; do
+    read -r user repo conf_name <<<$(echo "$line" | sed -r "s/([^,]*),([^,]*),([^,]*)/\1 \2 \3/")
+    if [ "$1" == "$conf_name" ]; then
+        verbose "Script $conf_name found !"
+
+        exec_confloose "$user" "$repo" "$conf_name"
+
+        if [ "$mode_noexec" -eq 0 ]; then
+            verbose "Removing confuse install script (this script)."
+            rm -f "$0"
+        fi
+        exit 0
     fi
-done <$(curl -s "$masterlist_url");
+done < <(curl -s "$masterlist_url")
 
-if [ "$found" -ne 1 ]; then
-    verbose "Confloose $1 not found, try ./cristaline.sh -l for a list of available confloose"
-    exit 1
-fi
-
-# Executing exec_confuse with corresponding parameters
-verbose "Script $conf_name found !"
-
-exec_confloose "$user" "$repo" "$conf_name"
-
-if [ "$mode_noexec" -eq 0]; then
-    verbose "Removing confuse install script (this script)."
-    rm -f "$0"
-fi
-
-exit 0
+verbose "Confloose $1 not found, try ./cristaline.sh -l for a list of available confloose"
+exit 1
